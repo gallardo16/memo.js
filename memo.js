@@ -4,9 +4,12 @@ const inquirer = require('inquirer')
 
 class Memo {
   constructor () {
-//    this.argv = require('minimist')(process.argv.slice(2))
-//    this.fs = require('fs')
-//    this.inquirer = require('inquirer')
+    this.notes = fs.readdirSync('memos')
+    this.firstLineOfNotes = []
+    for (const note of this.notes) {
+      const noteContent = fs.readFileSync(`./memos/${note}`, 'utf-8')
+      this.firstLineOfNotes.push(noteContent.split('\n')[0])
+    }
   }
 
   create () {
@@ -23,60 +26,40 @@ class Memo {
   }
 
   showList () {
-    const memos = fs.readdirSync('memos')
-    for (const memo of memos) {
-      const memoContent = fs.readFileSync(`./memos/${memo}`, 'utf-8')
-      console.log(memoContent.split('\n')[0])
-    }
+    console.log(this.firstLineOfNotes.join('\n'))
   }
 
   show () {
-    const memos = fs.readdirSync('memos')
-    const memosFirstLine = []
-
-    for (const memo of memos) {
-      const memoContent = fs.readFileSync(`./memos/${memo}`, 'utf-8')
-      memosFirstLine.push(memoContent.split('\n')[0])
-    }
-
     inquirer
       .prompt([
         {
           type: 'list',
-          name: 'memo',
+          name: 'note',
           message: 'Choose a note you want to see:',
-          choices: memosFirstLine
+          choices: this.firstLineOfNotes
         }
       ])
       .then(answers => {
-        const noteIdx = memosFirstLine.indexOf(answers.memo)
-        const noteFile = memos[noteIdx]
+        const noteIdx = this.firstLineOfNotes.indexOf(answers.note)
+        const noteFile = this.notes[noteIdx]
         const content = fs.readFileSync(`./memos/${noteFile}`, 'utf-8')
         console.log(content)
       })
   }
 
   destroy () {
-    const memos = fs.readdirSync('memos')
-    const memosFirstLine = []
-
-    for (const memo of memos) {
-      const memoContent = fs.readFileSync(`./memos/${memo}`, 'utf-8')
-      memosFirstLine.push(memoContent.split('\n')[0])
-    }
-
     inquirer
       .prompt([
         {
           type: 'list',
-          name: 'memo',
+          name: 'note',
           message: 'Choose a note you want to delete:',
-          choices: memosFirstLine
+          choices: this.firstLineOfNotes
         }
       ])
       .then(answers => {
-        const noteIdx = memosFirstLine.indexOf(answers.memo)
-        const noteFile = memos[noteIdx]
+        const noteIdx = this.firstLineOfNotes.indexOf(answers.note)
+        const noteFile = this.notes[noteIdx]
         fs.unlinkSync(`./memos/${noteFile}`)
         console.log('メモを削除しました')
       })
